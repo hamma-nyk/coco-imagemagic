@@ -1,15 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { executeCutoutTask } from '@/lib/cutout-service';
-export async function POST(req: NextRequest) {
-  const origin = req.headers.get('origin');
-  const host = req.headers.get('host');
-  
-  // Ganti dengan domain produksi Anda nantinya
-  const allowedOrigins = ['http://localhost:3000', 'https://coco.com'];
+import { validateRequest } from '@/lib/security';
 
-  if (!origin || !allowedOrigins.includes(origin)) {
-    return NextResponse.json({ error: 'Unauthorized Access' }, { status: 403 });
+export async function POST(req: NextRequest) {
+  // --- PROTEKSI START ---
+  const check = validateRequest(req);
+  if (!check.isValid) {
+    return NextResponse.json(
+      { error: check.message, code: 'UNAUTHORIZED_ACCESS' }, 
+      { status: 403 }
+    );
   }
+  // --- PROTEKSI END ---
   try {
     const formData = await req.formData();
     const file = formData.get('image') as File;
