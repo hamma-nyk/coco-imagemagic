@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { executeIloveApiTask } from "@/lib/iloveapi-service";
+import sharp from "sharp";
 import { validateRequest } from "@/lib/security";
 import { rateLimit } from "@/lib/ratelimit";
 
@@ -30,26 +30,34 @@ export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
     const file = formData.get("image") as File;
-    const targetFormat = formData.get("to") as string;
 
-    if (!file || !targetFormat) {
-      return NextResponse.json(
-        { error: "Image and Target Format are required" },
-        { status: 400 },
-      );
-    }
+    // Ambil data koordinat crop dari frontend
+    const x = Math.round(Number(formData.get("x")));
+    const y = Math.round(Number(formData.get("y")));
+    const width = Math.round(Number(formData.get("width")));
+    const height = Math.round(Number(formData.get("height")));
 
-    const blob = await executeIloveApiTask(file, "convertimage", {
-      to: targetFormat,
-    });
+    if (!file) throw new Error("No image provided");
 
-    return new NextResponse(blob, {
+    // Konversi File ke Buffer
+    const buffer = Buffer.from(await file.arrayBuffer());
+
+    // --- PROSES CROP LOKAL DENGAN SHARP ---
+    const croppedBuffer = await sharp(buffer)
+      .extract({ left: x, top: y, width: width, height: height })
+      .toBuffer();
+
+    return new NextResponse(croppedBuffer, {
       headers: {
-        "Content-Type": `image/${targetFormat}`,
-        "Content-Disposition": `attachment; filename="converted-${file.name.split(".")[0]}.${targetFormat}"`,
+        "Content-Type": file.type,
+        "Content-Disposition": `attachment; filename="cropped-${file.name}"`,
       },
     });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("Crop error:", error);
+    return NextResponse.json(
+      { error: "Failed to crop image" },
+      { status: 500 },
+    );
   }
 }
