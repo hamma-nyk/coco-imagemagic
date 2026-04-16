@@ -30,11 +30,11 @@ export default function CropTool() {
   // Helper untuk inisialisasi center crop saat ganti ratio
   function onImageLoad(e: React.SyntheticEvent<HTMLImageElement>) {
   const { width, height } = e.currentTarget;
-  // Jika ada aspect, buat kotak sesuai aspect. Jika tidak, buat kotak bebas.
+  
   const initialCrop = centerCrop(
     makeAspectCrop(
       { unit: "%", width: 90 }, 
-      aspect || 1, // Fallback ke 1:1 jika Free
+      aspect || 1, 
       width, 
       height
     ), 
@@ -43,38 +43,27 @@ export default function CropTool() {
   );
   
   if (aspect === undefined) {
-    delete initialCrop.aspect;
+    // Cast ke any sebelum delete agar TS tidak protes
+    delete (initialCrop as any).aspect;
   }
   
   setCrop(initialCrop);
 }
 
   function handleSetAspect(ratio: number | undefined, circleMode: boolean = false) {
-  // Update state aspect dan mode circle
   setAspect(ratio);
   setIsCircle(circleMode);
   
   if (imgRef.current) {
     const { width, height } = imgRef.current;
-    
-    // Paksa pembuatan crop baru agar UI me-refresh bentuk mask-nya
     const newCrop = centerCrop(
-      makeAspectCrop(
-        { 
-          unit: "%", 
-          width: 90 
-        }, 
-        ratio || 1, // Jika ratio undefined (Free), gunakan default 1 sementara untuk inisialisasi
-        width, 
-        height
-      ),
+      makeAspectCrop({ unit: "%", width: 90 }, ratio || 1, width, height),
       width,
       height
     );
 
-    // Jika pilih "Free", hapus aspek rasio setelah inisialisasi awal
     if (ratio === undefined) {
-      newCrop.aspect = undefined;
+      delete (newCrop as any).aspect; // Gunakan (newCrop as any)
     }
 
     setCrop(newCrop);
