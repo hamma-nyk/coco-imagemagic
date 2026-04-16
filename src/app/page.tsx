@@ -9,6 +9,10 @@ import {
   Palette,
   Sparkles,
   Scissors,
+  ArrowRightLeft,
+  FileImage,
+  FileScan,
+  Stamp,
 } from "lucide-react";
 
 const tools = [
@@ -67,6 +71,34 @@ const tools = [
     icon: <Scissors className="w-5 h-5 text-purple-400" />,
     href: "/tools/crop",
     color: "group-hover:border-purple-500/50",
+  },
+  {
+    title: "Convert to ICO",
+    desc: "Ubah gambar menjadi format ICO.",
+    icon: <ArrowRightLeft className="w-5 h-5 text-green-400" />,
+    href: "/tools/ico",
+    color: "group-hover:border-green-500/50",
+  },
+  {
+    title: "Image to PDF",
+    desc: "Ubah gambar menjadi format PDF.",
+    icon: <FileImage className="w-5 h-5 text-blue-400" />,
+    href: "/tools/image-to-pdf",
+    color: "group-hover:border-blue-500/50",
+  },
+  {
+    title: "PDF to Image",
+    desc: "Ubah PDF menjadi format gambar.",
+    icon: <FileScan className="w-5 h-5 text-pink-400" />,
+    href: "/tools/pdf-to-image",
+    color: "group-hover:border-pink-500/50",
+  },
+  {
+    title: "Watermark",
+    desc: "Tambahkan watermark pada gambar.",
+    icon: <Stamp className="w-5 h-5 text-yellow-400" />,
+    href: "/tools/watermark",
+    color: "group-hover:border-yellow-500/50",
   },
 ];
 

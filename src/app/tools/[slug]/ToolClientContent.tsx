@@ -10,6 +10,10 @@ import ConvertTool from "@/components/ConvertTool";
 import ColorizeTool from "@/components/ColorizeTool"; // Import baru
 import EnhanceTool from "@/components/EnhanceTool"; // Import baru
 import CropTool from "@/components/CropTool"; // Import baru
+import IcoTool from "@/components/IcoTool";
+import ImageToPdf from "@/components/ImageToPdf"; // Import baru untuk konversi gambar ke PDF
+import PdfToImage from "@/components/PdfToImage";
+import WatermarkTool from "@/components/WatermarkTool";
 export default function ToolClientContent({ slug }: { slug: string }) {
   const renderTool = () => {
     switch (slug) {
@@ -29,6 +33,14 @@ export default function ToolClientContent({ slug }: { slug: string }) {
         return <EnhanceTool />; // Route baru
       case "crop":
         return <CropTool />; // Route baru
+      case "ico":
+        return <IcoTool />; // Route baru 
+      case "image-to-pdf":
+        return <ImageToPdf />; // Route baru untuk konversi gambar ke PDF
+      case "pdf-to-image":
+        return <PdfToImage />;
+      case "watermark":
+        return <WatermarkTool />;
       default:
         return (
           <div className="text-center py-20 border border-dashed border-white/10 rounded-3xl">

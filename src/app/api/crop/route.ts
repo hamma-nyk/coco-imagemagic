@@ -1,3 +1,4 @@
+// app/api/crop/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import sharp from "sharp";
 import { validateRequest } from "@/lib/security";
@@ -7,31 +8,33 @@ export async function POST(req: NextRequest) {
   // 1. Ambil IP Pengguna
   const ip = req.headers.get("x-forwarded-for") || "127.0.0.1";
 
-  // 2. Cek Rate Limit (Contoh: Max 5 request per menit per IP)
-  const limitCheck = rateLimit(ip, 5);
+  // 2. Cek Rate Limit
+  const limitCheck = rateLimit(ip, 30);
   if (limitCheck.isLimited) {
     return NextResponse.json(
       {
         error: "Too many requests. Please try again in 1 minute.",
         code: "RATE_LIMIT_EXCEEDED",
       },
-      { status: 429 }, // HTTP 429: Too Many Requests
+      { status: 429 }
     );
   }
-  // --- PROTEKSI START ---
+
+  // 3. Validasi Keamanan (Referer & Origin)
   const check = validateRequest(req);
   if (!check.isValid) {
     return NextResponse.json(
       { error: check.message, code: "UNAUTHORIZED_ACCESS" },
-      { status: 403 },
+      { status: 403 }
     );
   }
-  // --- PROTEKSI END ---
+
   try {
     const formData = await req.formData();
     const file = formData.get("image") as File;
+    const isCircle = formData.get("isCircle") === "true"; // Ambil flag isCircle
 
-    // Ambil data koordinat crop dari frontend
+    // Ambil koordinat
     const x = Math.round(Number(formData.get("x")));
     const y = Math.round(Number(formData.get("y")));
     const width = Math.round(Number(formData.get("width")));
@@ -39,25 +42,50 @@ export async function POST(req: NextRequest) {
 
     if (!file) throw new Error("No image provided");
 
-    // Konversi File ke Buffer
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    // --- PROSES CROP LOKAL DENGAN SHARP ---
-    const croppedBuffer = await sharp(buffer)
-      .extract({ left: x, top: y, width: width, height: height })
-      .toBuffer();
+    // --- LOGIKA PEMROSESAN LOKAL (SHARP) ---
+    
+    // Tahap 1: Ekstraksi area kotak (Dasar untuk semua mode)
+    let pipeline = sharp(buffer).extract({ left: x, top: y, width, height });
 
-    return new NextResponse(croppedBuffer, {
+    if (isCircle) {
+      // Tahap 2: Jika Circle, buat Masking SVG
+      // Lingkaran sempurna membutuhkan radius = lebar / 2
+      const radius = width / 2;
+      const svgMask = Buffer.from(
+        `<svg width="${width}" height="${height}">
+          <circle cx="${radius}" cy="${radius}" r="${radius}" fill="black" />
+        </svg>`
+      );
+
+      // Gunakan blend 'dest-in' untuk memotong area di luar lingkaran menjadi transparan
+      pipeline = pipeline.composite([
+        {
+          input: svgMask,
+          blend: "dest-in",
+        },
+      ]);
+    }
+
+    // Tahap 3: Finalisasi Buffer
+    // Jika circle, WAJIB PNG agar transparansi (alpha channel) tidak hilang
+    const finalBuffer = isCircle 
+      ? await pipeline.png().toBuffer() 
+      : await pipeline.toBuffer();
+
+    return new NextResponse(finalBuffer, {
       headers: {
-        "Content-Type": file.type,
-        "Content-Disposition": `attachment; filename="cropped-${file.name}"`,
+        "Content-Type": isCircle ? "image/png" : file.type,
+        "Content-Disposition": `attachment; filename="cropped-${file.name}${isCircle ? '.png' : ''}"`,
       },
     });
+
   } catch (error: any) {
     console.error("Crop error:", error);
     return NextResponse.json(
-      { error: "Failed to crop image" },
-      { status: 500 },
+      { error: "Internal Server Error during image processing" },
+      { status: 500 }
     );
   }
 }
