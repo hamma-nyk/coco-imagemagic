@@ -113,7 +113,7 @@ export default function Dashboard() {
       <div className="max-w-6xl mx-auto px-6 py-16 relative z-10">
         <header className="mb-16 text-center">
           <div className="inline-block px-3 py-1 rounded-full border border-lime-500/20 bg-lime-500/5 text-[10px] font-mono text-lime-500 tracking-widest uppercase mb-4 animate-pulse">
-            Neural Engine v1.0 Active
+            Neural Engine v1.0 Actives
           </div>
           <h2 className="text-5xl font-black mb-4 pb-2 tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-white to-white/40">
             Coco Image<span className="text-lime-400">Magic.</span>
