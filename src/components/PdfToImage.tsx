@@ -44,11 +44,16 @@ export default function PdfToImage() {
         canvas.width = viewport.width;
 
         if (context) {
-          await page.render({ canvasContext: context, viewport }).promise;
-          resultImages.push({
-            url: canvas.toDataURL("image/png"),
-            page: i
-          });
+            await page.render({ 
+                canvasContext: context, 
+                viewport,
+                canvas: canvas // Tambahkan baris ini
+            }).promise;
+            
+            resultImages.push({
+                url: canvas.toDataURL("image/png"),
+                page: i
+            });
         }
         setProgress(Math.round((i / totalPages) * 100));
       }
