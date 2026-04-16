@@ -95,7 +95,7 @@ export async function POST(req: NextRequest) {
       })
       .toBuffer();
 
-    return new NextResponse(processedImage, {
+    return new NextResponse(new Uint8Array(processedImage), {
       headers: {
         "Content-Type": file.type,
         "Content-Disposition": `attachment; filename="protected-${file.name}"`,

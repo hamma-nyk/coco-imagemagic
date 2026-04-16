@@ -31,11 +31,12 @@ export async function POST(req: NextRequest) {
     // 2. Gabungkan semua PNG buffer menjadi satu file ICO
     const icoBuffer = await pngToIco(pngBuffers);
 
-    return new NextResponse(icoBuffer, {
-      headers: {
+    // Bungkus icoBuffer dengan Uint8Array agar kompatibel dengan NextResponse
+    return new NextResponse(new Uint8Array(icoBuffer), {
+    headers: {
         "Content-Type": "image/x-icon",
         "Content-Disposition": `attachment; filename="${file.name.split('.')[0]}.ico"`,
-      },
+    },
     });
   } catch (error: any) {
     console.error("ICO Conversion Error:", error);

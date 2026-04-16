@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
       ? await pipeline.png().toBuffer() 
       : await pipeline.toBuffer();
 
-    return new NextResponse(finalBuffer, {
+    return new NextResponse(new Uint8Array(finalBuffer), {
       headers: {
         "Content-Type": isCircle ? "image/png" : file.type,
         "Content-Disposition": `attachment; filename="cropped-${file.name}${isCircle ? '.png' : ''}"`,
