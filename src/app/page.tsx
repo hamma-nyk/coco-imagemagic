@@ -119,7 +119,7 @@ export default function Dashboard() {
             Coco Image<span className="text-lime-400">Magic.</span>
           </h2>
           <p className="text-slate-500 text-sm font-medium max-w-md mx-auto">
-            Proses aset digital Anda dengan modul AI generasi terbaru.
+            Transformasi gambar instan dengan sentuhan AI. Pilih alat, unggah, dan biarkan keajaiban terjadi.
           </p>
         </header>
 
